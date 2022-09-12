@@ -3,7 +3,6 @@ module github.com/gregoriusongo/price-tracker
 go 1.18
 
 require (
-	github.com/go-sql-driver/mysql v1.3.0
 	github.com/spf13/viper v1.0.2
 	gorm.io/driver/postgres v1.3.9
 	gorm.io/gorm v1.23.8

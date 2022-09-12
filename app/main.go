@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"log"
 
-	_ "github.com/go-sql-driver/mysql"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -36,17 +35,6 @@ func main() {
 		log.Fatal(err)
 	}
 	fmt.Println(dbConn)
-	// err = dbConn.Ping()
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
-	// defer func() {
-	// 	err := dbConn.Close()
-	// 	if err != nil {
-	// 		log.Fatal(err)
-	// 	}
-	// }()
 
 	// e := echo.New()
 	// middL := _articleHttpDeliveryMiddleware.InitMiddleware()
