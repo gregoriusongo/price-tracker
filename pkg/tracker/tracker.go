@@ -2,42 +2,36 @@ package tracker
 
 import (
 	"fmt"
-	"log"
 
-	"github.com/gocolly/colly/v2"
+	"github.com/gregoriusongo/price-tracker/pkg/config"
 	"github.com/gregoriusongo/price-tracker/pkg/model"
 )
 
-// init basic scraper
-func init_scraper() *colly.Collector {
-	c := colly.NewCollector(
-		colly.MaxDepth(1),
-	)
+func scrapeSingleItem(item model.Item){
+	scraper := config.GetScraper()
+	fmt.Println(item)
 
-	// Before making a request print "Visiting ..."
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL.String())
-	})
-
-	c.OnError(func(_ *colly.Response, err error) {
-		log.Println("Something went wrong:", err)
-	})
-
-	return c
+	scraper.Visit(item.Url)
 }
 
 func Scrape() {
-	init_scraper()
+	config.InitScraper()
+	items := model.GetAllItems()
+
+	fmt.Println(items[0].Name)
+
+	for _, element := range items {
+		// index is the index where we are
+		// element is the element from someSlice for where we are
+		scrapeSingleItem(element)
+	}
 }
 
 func Test() {
-	// result := model.GetAllItems()
-	result, db := model.GetItemById(22)
+	// Scrape()
+	// result, db := model.GetItemById(22)
 
-	if db.Error != nil {
-		panic(db.Error)
-	}
 	// res, _ :=json.Marshal(result)
-	fmt.Println(result.Name)
+	// fmt.Println(result.Name)
 	// getItem()
 }

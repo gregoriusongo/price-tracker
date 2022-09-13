@@ -4,13 +4,15 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/gocolly/colly/v2"
 	"github.com/spf13/viper"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 )
 
 var (
-	db *gorm.DB
+	db      *gorm.DB
+	scraper *colly.Collector
 )
 
 func init() {
@@ -29,7 +31,7 @@ func Connect() {
 	dbUser := viper.GetString(`database.user`)
 	dbPass := viper.GetString(`database.pass`)
 	dbName := viper.GetString(`database.name`)
-	
+
 	// connect to db
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Asia/Jakarta", dbHost, dbUser, dbPass, dbName, dbPort)
 	dbConn, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
@@ -43,4 +45,25 @@ func Connect() {
 
 func GetDB() *gorm.DB {
 	return db
+}
+
+func InitScraper() {
+	c := colly.NewCollector(
+		colly.MaxDepth(1),
+	)
+
+	// Before making a request print "Visiting ..."
+	c.OnRequest(func(r *colly.Request) {
+		fmt.Println("Visiting", r.URL.String())
+	})
+
+	c.OnError(func(_ *colly.Response, err error) {
+		log.Println("Something went wrong:", err)
+	})
+
+	scraper = c
+}
+
+func GetScraper() *colly.Collector {
+	return scraper
 }

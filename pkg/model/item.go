@@ -39,6 +39,6 @@ func GetAllItems() []Item {
 
 func GetItemById(id int64) (*Item, *gorm.DB){
 	var item Item
-	db:=db.Where("ID=?", id).Find(&item)
+	db:=db.Where("ID=?", id).First(&item)
 	return &item, db
 }

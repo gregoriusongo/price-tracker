@@ -20,5 +20,5 @@ func init(){
 }
 
 func main() {
-	tracker.Test()
+	tracker.Scrape()
 }
