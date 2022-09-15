@@ -12,18 +12,15 @@ type Item entity.Item
 
 type ItemService entity.ItemService
 
-
-// set table name for gorm
-func (Item) TableName() string {
-	return "item"
-}
-
 func (i *Item) GetAllItems() []Item {
 	var items []*Item
 	ctx := context.Background()
 
-	query := `SELECT i.id, i.name, i.url, last_price, status, e.site_url as ecommerce_url, i.date_created FROM item i
-	JOIN ecommerce e on i.ecommerce_id = e.id`
+	query := `
+	SELECT i.id, i.name, i.url, last_price, status, e.site_url as ecommerce_url, i.date_created
+	FROM item i
+	JOIN ecommerce e on i.ecommerce_id = e.id
+	`
 
 	pgxscan.Select(ctx, dbpool, &items, query)
 

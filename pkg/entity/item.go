@@ -2,8 +2,6 @@ package entity
 
 import (
 	"time"
-
-	"gorm.io/gorm"
 )
 
 type Item struct {
@@ -17,11 +15,5 @@ type Item struct {
 }
 
 type ItemService interface {
-	TableName() string
-
 	GetAllItems() []Item
-
-	GetItemById(id int64) (*Item, *gorm.DB)
-
-	UpdateItemById(id int64) (*Item, *gorm.DB)
 }
