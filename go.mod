@@ -3,8 +3,10 @@ module github.com/gregoriusongo/price-tracker
 go 1.18
 
 require (
+	github.com/georgysavva/scany v1.2.0
+	github.com/gocolly/colly/v2 v2.1.0
+	github.com/jackc/pgx/v4 v4.17.2
 	github.com/spf13/viper v1.0.2
-	gorm.io/driver/postgres v1.3.9
 	gorm.io/gorm v1.23.8
 )
 
@@ -16,7 +18,6 @@ require (
 	github.com/antchfx/xpath v1.2.1 // indirect
 	github.com/fsnotify/fsnotify v1.4.7 // indirect
 	github.com/gobwas/glob v0.2.3 // indirect
-	github.com/gocolly/colly/v2 v2.1.0 // indirect
 	github.com/golang/groupcache v0.0.0-20210331224755-41bb18bfe9da // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/hashicorp/hcl v0.0.0-20180404174102-ef8a98b0bbce // indirect
@@ -27,7 +28,7 @@ require (
 	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/pgtype v1.12.0 // indirect
-	github.com/jackc/pgx/v4 v4.17.2 // indirect
+	github.com/jackc/puddle v1.3.0 // indirect
 	github.com/jinzhu/inflection v1.0.0 // indirect
 	github.com/jinzhu/now v1.1.5 // indirect
 	github.com/kennygrant/sanitize v1.2.4 // indirect
@@ -46,5 +47,5 @@ require (
 	golang.org/x/text v0.3.7 // indirect
 	google.golang.org/appengine v1.6.7 // indirect
 	google.golang.org/protobuf v1.28.1 // indirect
-	gopkg.in/yaml.v2 v2.2.2 // indirect
+	gopkg.in/yaml.v2 v2.4.0 // indirect
 )

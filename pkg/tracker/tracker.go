@@ -3,34 +3,34 @@ package tracker
 import (
 	"fmt"
 
-	"github.com/gregoriusongo/price-tracker/pkg/config"
-	"github.com/gregoriusongo/price-tracker/pkg/entity"
 	db "github.com/gregoriusongo/price-tracker/pkg/repo/postgres"
 )
 
-var is db.ItemService
 var item db.Item
+// var ecommerce db.Ecommerce
 
-func scrapeSingleItem(item entity.Item){
-	scraper := config.GetScraper()
+func scrapeSingleItem(item db.Item){
+	// config.InitScraper()
+	// scraper := config.GetScraper()
 	fmt.Println(item)
 
-	scraper.Visit(item.Url)
+	// scraper.Visit(item.Url)
 
-	scraper.Wait()
+	// scraper.Wait()
 }
 
 func Scrape() {
 	// is = &item
-	config.InitScraper()
-	
 	items := item.GetAllItems()
-
+	// ecommerces := ecommerce.GetAllEcommerce()
+	
 	fmt.Println(items[0].Name)
+	return
+	// fmt.Println(ecommerces[0].Name)
 
 	for _, element := range items {
-		fmt.Println(element)
-		// scrapeSingleItem(element)
+		// fmt.Println(element)
+		scrapeSingleItem(element)
 	}
 }
 

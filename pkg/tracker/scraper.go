@@ -1,27 +1,24 @@
-package config
+package tracker
 
 import (
 	"fmt"
 	"log"
 
 	"github.com/gocolly/colly/v2"
-	"github.com/spf13/viper"
-	"gorm.io/gorm"
 )
 
 var (
-	db      *gorm.DB
 	scraper *colly.Collector
 )
 
 func init() {
 	// load config
-	viper.SetConfigFile(`config.json`)
+	// viper.SetConfigFile(`config.json`)
 
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(err)
-	}
+	// err := viper.ReadInConfig()
+	// if err != nil {
+	// 	panic(err)
+	// }
 }
 
 func InitScraper() {
