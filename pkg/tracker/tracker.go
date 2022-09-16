@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"strconv"
+	"strings"
 	"time"
 
 	"github.com/chromedp/chromedp"
@@ -15,21 +17,17 @@ import (
 var item db.Item
 
 func Scrape() {
-	// is = &item
 	items, err := item.GetAllItems()
 	if err != nil {
 		panic(err)
 	}
 
-	// fmt.Println(items[0].Name)
 	for _, item := range items {
 		scrapeSingleItem(item)
 	}
-	// fmt.Println(ecommerces[0].Name)
 }
 
 func scrapeSingleItem(item db.Item) {
-	// config.InitScraper()
 	var selector = map[string]string{}
 
 	if item.NameSelector != nil {
@@ -45,10 +43,6 @@ func scrapeSingleItem(item db.Item) {
 	}
 
 	ScrapeJsSite(item.Url, selector)
-
-	// scraper.Visit(item.Url)
-
-	// scraper.Wait()
 }
 
 // scrape js site using chromedp
@@ -65,8 +59,8 @@ func ScrapeJsSite(url string, selector map[string]string) {
 	defer cancel()
 
 	var name string
-	var originalPrice string
-	var discountPrice string
+	var op string
+	var dp string
 	// navigate to a page, wait for an element, click
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(url),
@@ -77,12 +71,16 @@ func ScrapeJsSite(url string, selector map[string]string) {
 		
 		// retrieve data
 		chromedp.Text(selector["name"], &name),
-		chromedp.Text(selector["price"], &originalPrice),
-		chromedp.Text(selector["discountPrice"], &discountPrice),
+		chromedp.Text(selector["price"], &op),
+		chromedp.Text(selector["discountPrice"], &dp),
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// remove unused char from string
+	originalPrice := preparePrice(op)
+	discountPrice := preparePrice(dp)
 
 	log.Println("Jd.id product data:")
 	log.Println("name:", name)
@@ -124,6 +122,22 @@ func ScrapeHtml(url string, selector map[string]string) {
 	c.Visit(url)
 
 	// scraper = c
+}
+
+// remove usual addition in price text scraped from web and convert it to int
+func preparePrice(price string) int{
+	price = strings.ReplaceAll(price, ",", "")
+	price = strings.ReplaceAll(price, ".", "")
+	price = strings.ReplaceAll(price, "Rp", "")
+	price = strings.ReplaceAll(price, "rp", "")
+	price = strings.ReplaceAll(price, "-", "")
+
+	priceInt, err := strconv.Atoi(price)
+	if err != nil{
+		log.Fatal(err)
+	}
+
+	return priceInt
 }
 
 func Test() {
