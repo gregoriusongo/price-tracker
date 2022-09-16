@@ -16,6 +16,13 @@ import (
 
 var item db.Item
 
+type ScrapeData struct {
+	Name          string
+	Sku           string
+	OriginalPrice int
+	DiscountPrice int
+}
+
 func Scrape() {
 	items, err := item.GetAllItems()
 	if err != nil {
@@ -23,11 +30,18 @@ func Scrape() {
 	}
 
 	for _, item := range items {
-		scrapeSingleItem(item)
+		// get current item data
+		scrapeData := scrapeSingleItem(item)
+
+		// compare data to get the updated data set
+		newData := compareScrapedData(item, scrapeData)
+		log.Println(newData)
+
+		// update database
 	}
 }
 
-func scrapeSingleItem(item db.Item) {
+func scrapeSingleItem(item db.Item) ScrapeData{
 	var selector = map[string]string{}
 
 	if item.NameSelector != nil {
@@ -42,11 +56,11 @@ func scrapeSingleItem(item db.Item) {
 		selector["discountPrice"] = *item.DiscountPriceSelector
 	}
 
-	ScrapeJsSite(item.Url, selector)
+	return ScrapeJsSite(item.Url, selector)
 }
 
 // scrape js site using chromedp
-func ScrapeJsSite(url string, selector map[string]string) {
+func ScrapeJsSite(url string, selector map[string]string) ScrapeData{
 	// create chrome instance
 	ctx, cancel := chromedp.NewContext(
 		context.Background(),
@@ -58,7 +72,7 @@ func ScrapeJsSite(url string, selector map[string]string) {
 	ctx, cancel = context.WithTimeout(ctx, 15*time.Second)
 	defer cancel()
 
-	var name string
+	var scrapeData ScrapeData
 	var op string
 	var dp string
 	// navigate to a page, wait for an element, click
@@ -70,7 +84,7 @@ func ScrapeJsSite(url string, selector map[string]string) {
 		// chromedp.Click(`#example-After`, chromedp.NodeVisible),
 
 		// retrieve data
-		chromedp.Text(selector["name"], &name),
+		chromedp.Text(selector["name"], &scrapeData.Name),
 		chromedp.Text(selector["price"], &op),
 		chromedp.Text(selector["discountPrice"], &dp),
 	)
@@ -79,16 +93,18 @@ func ScrapeJsSite(url string, selector map[string]string) {
 	}
 
 	// remove unused char from string
-	originalPrice := preparePrice(op)
-	discountPrice := preparePrice(dp)
+	scrapeData.OriginalPrice = preparePrice(op)
+	scrapeData.DiscountPrice = preparePrice(dp)
 
 	log.Println("Jd.id product data:")
-	log.Println("name:", name)
-	log.Println("original price:", originalPrice)
-	log.Println("discount price:", discountPrice)
+	log.Println("name:", scrapeData.Name)
+	log.Println("original price:", scrapeData.OriginalPrice)
+	log.Println("discount price:", scrapeData.DiscountPrice)
+
+	return scrapeData
 }
 
-// initialize colly scraper
+// scrape HTML using colly
 func ScrapeHtml(url string, selector map[string]string) {
 	c := colly.NewCollector(
 		colly.MaxDepth(1),
@@ -140,11 +156,9 @@ func preparePrice(price string) int {
 	return priceInt
 }
 
-func Test() {
-	// Scrape()
-	// result, db := model.GetItemById(22)
+func compareScrapedData(currentData db.Item, scrapeData ScrapeData) db.Item{
+	log.Println(currentData)
+	log.Println(scrapeData)
 
-	// res, _ :=json.Marshal(result)
-	// fmt.Println(result.Name)
-	// getItem()
+	return currentData
 }
