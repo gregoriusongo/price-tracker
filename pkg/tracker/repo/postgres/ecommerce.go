@@ -1,7 +1,7 @@
 package postgres
 
 import (
-	"github.com/gregoriusongo/price-tracker/pkg/entity"
+	"github.com/gregoriusongo/price-tracker/pkg/tracker/entity"
 )
 
 type Ecommerce entity.Ecommerce

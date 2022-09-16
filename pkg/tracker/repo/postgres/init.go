@@ -35,7 +35,7 @@ func Connect() {
 	}
 
 	if viper.GetBool(`debug`) {
-		fmt.Println("connected to database")
+		log.Println("connected to database")
 	}
 
 	dbpool = dbpoolConn
