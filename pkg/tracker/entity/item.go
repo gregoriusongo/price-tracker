@@ -9,6 +9,7 @@ type Item struct {
 	Name                  string
 	Url                   string
 	LastPrice             *int64
+	LowestPrice           *int64
 	Status                int8
 	DateCreated           time.Time
 	EcommerceUrl          string
