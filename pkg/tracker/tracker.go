@@ -160,5 +160,28 @@ func compareScrapedData(currentData db.Item, scrapeData ScrapeData) db.Item{
 	log.Println(currentData)
 	log.Println(scrapeData)
 
+	// set lowest price
+	if currentData.LowestPrice == nil{
+		currentData.LowestPrice = &scrapeData.DiscountPrice
+	}else if *currentData.LowestPrice > scrapeData.DiscountPrice{
+		currentData.LowestPrice = &scrapeData.DiscountPrice
+	}
+
+	// TODO add trend column to item table
+	// define trend (currently no database)
+	// var priceTrend string
+	// if currentData.LastPrice != nil{
+	// 	if *currentData.LastPrice < scrapeData.DiscountPrice{
+	// 		// price down
+	// 		priceTrend = "down"
+	// 	}else{
+	// 		// price up
+	// 		priceTrend = "up"
+	// 	}
+	// }
+	
+	// set last price
+	currentData.LastPrice = &scrapeData.DiscountPrice
+
 	return currentData
 }
