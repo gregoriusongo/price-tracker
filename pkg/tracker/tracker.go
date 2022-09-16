@@ -68,7 +68,7 @@ func ScrapeJsSite(url string, selector map[string]string) {
 		chromedp.WaitVisible(selector["name"]),
 		// find and click "Example" link
 		// chromedp.Click(`#example-After`, chromedp.NodeVisible),
-		
+
 		// retrieve data
 		chromedp.Text(selector["name"], &name),
 		chromedp.Text(selector["price"], &op),
@@ -125,7 +125,7 @@ func ScrapeHtml(url string, selector map[string]string) {
 }
 
 // remove usual addition in price text scraped from web and convert it to int
-func preparePrice(price string) int{
+func preparePrice(price string) int {
 	price = strings.ReplaceAll(price, ",", "")
 	price = strings.ReplaceAll(price, ".", "")
 	price = strings.ReplaceAll(price, "Rp", "")
@@ -133,7 +133,7 @@ func preparePrice(price string) int{
 	price = strings.ReplaceAll(price, "-", "")
 
 	priceInt, err := strconv.Atoi(price)
-	if err != nil{
+	if err != nil {
 		log.Fatal(err)
 	}
 
