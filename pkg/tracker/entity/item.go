@@ -4,7 +4,6 @@ import (
 	"time"
 )
 
-// TODO add lowest discount and last discount percentage
 type Item struct {
 	ID                    int
 	Name                  string
@@ -17,6 +16,8 @@ type Item struct {
 	EcommerceName         string
 	DiscountPriceSelector *string
 	OriginalPriceSelector *string
+	LastDiscount          *int // in percentage
+	LowestDiscount        *int // in percentage
 	NameSelector          *string
 }
 

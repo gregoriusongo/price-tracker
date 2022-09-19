@@ -13,6 +13,7 @@ import (
 
 var (
 	dbpool *pgxpool.Pool
+	// batch *pgx.Batch // unused for now
 )
 
 func init() {

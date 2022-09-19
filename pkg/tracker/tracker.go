@@ -34,8 +34,9 @@ func Scrape() {
 		scrapeData := scrapeSingleItem(item)
 
 		// compare data to get the updated data set
-		newData := compareScrapedData(item, scrapeData)
-		log.Println(newData)
+		compareScrapedData(&item, scrapeData)
+		// log.Println(item)
+		item.UpdateitemAfterTrack()
 
 		// update database
 	}
@@ -78,10 +79,9 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData{
 	// navigate to a page, wait for an element, click
 	err := chromedp.Run(ctx,
 		chromedp.Navigate(url),
-		// wait for footer element is visible (ie, page is loaded)
+		
+		// wait for the page to load
 		chromedp.WaitVisible(selector["name"]),
-		// find and click "Example" link
-		// chromedp.Click(`#example-After`, chromedp.NodeVisible),
 
 		// retrieve data
 		chromedp.Text(selector["name"], &scrapeData.Name),
@@ -96,10 +96,10 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData{
 	scrapeData.OriginalPrice = preparePrice(op)
 	scrapeData.DiscountPrice = preparePrice(dp)
 
-	log.Println("Jd.id product data:")
-	log.Println("name:", scrapeData.Name)
-	log.Println("original price:", scrapeData.OriginalPrice)
-	log.Println("discount price:", scrapeData.DiscountPrice)
+	// log.Println("Jd.id product data:")
+	// log.Println("name:", scrapeData.Name)
+	// log.Println("original price:", scrapeData.OriginalPrice)
+	// log.Println("discount price:", scrapeData.DiscountPrice)
 
 	return scrapeData
 }
@@ -136,7 +136,6 @@ func ScrapeHtml(url string, selector map[string]string) {
 	})
 
 	c.Visit(url)
-
 	// scraper = c
 }
 
@@ -156,7 +155,7 @@ func preparePrice(price string) int {
 	return priceInt
 }
 
-func compareScrapedData(currentData db.Item, scrapeData ScrapeData) db.Item{
+func compareScrapedData(currentData *db.Item, scrapeData ScrapeData){
 	log.Println(currentData)
 	log.Println(scrapeData)
 
@@ -182,6 +181,4 @@ func compareScrapedData(currentData db.Item, scrapeData ScrapeData) db.Item{
 	
 	// set last price
 	currentData.LastPrice = &scrapeData.DiscountPrice
-
-	return currentData
 }
