@@ -21,7 +21,7 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 	defer cancel()
 
 	// create a timeout
-	ctx, cancel = context.WithTimeout(ctx, 15*time.Second)
+	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 
 	var scrapeData ScrapeData
@@ -48,9 +48,9 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 	scrapeData.DiscountPrice = preparePrice(dp)
 
 	// log.Println("Jd.id product data:")
-	// log.Println("name:", scrapeData.Name)
-	// log.Println("original price:", scrapeData.OriginalPrice)
-	// log.Println("discount price:", scrapeData.DiscountPrice)
+	log.Println("name:", scrapeData.Name)
+	log.Println("original price:", scrapeData.OriginalPrice)
+	log.Println("discount price:", scrapeData.DiscountPrice)
 
 	return scrapeData
 }
