@@ -1,26 +1,21 @@
 package tracker
 
 import (
-	"context"
-	"fmt"
 	"log"
-	"os"
 	"strconv"
 	"strings"
-	"time"
 
-	"github.com/chromedp/chromedp"
-	"github.com/gocolly/colly/v2"
 	db "github.com/gregoriusongo/price-tracker/pkg/tracker/repo/postgres"
 )
 
 var item db.Item
 
 type ScrapeData struct {
-	Name          string
-	Sku           string
-	OriginalPrice int
-	DiscountPrice int
+	Name               string
+	Sku                string
+	OriginalPrice      int
+	DiscountPrice      int
+	DiscountPercentage int
 }
 
 func Scrape() {
@@ -42,7 +37,7 @@ func Scrape() {
 	}
 }
 
-func scrapeSingleItem(item db.Item) ScrapeData{
+func scrapeSingleItem(item db.Item) ScrapeData {
 	var selector = map[string]string{}
 
 	if item.NameSelector != nil {
@@ -58,85 +53,6 @@ func scrapeSingleItem(item db.Item) ScrapeData{
 	}
 
 	return ScrapeJsSite(item.Url, selector)
-}
-
-// scrape js site using chromedp
-func ScrapeJsSite(url string, selector map[string]string) ScrapeData{
-	// create chrome instance
-	ctx, cancel := chromedp.NewContext(
-		context.Background(),
-		// chromedp.WithDebugf(log.Printf),
-	)
-	defer cancel()
-
-	// create a timeout
-	ctx, cancel = context.WithTimeout(ctx, 15*time.Second)
-	defer cancel()
-
-	var scrapeData ScrapeData
-	var op string
-	var dp string
-	// navigate to a page, wait for an element, click
-	err := chromedp.Run(ctx,
-		chromedp.Navigate(url),
-		
-		// wait for the page to load
-		chromedp.WaitVisible(selector["name"]),
-
-		// retrieve data
-		chromedp.Text(selector["name"], &scrapeData.Name),
-		chromedp.Text(selector["price"], &op),
-		chromedp.Text(selector["discountPrice"], &dp),
-	)
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// remove unused char from string
-	scrapeData.OriginalPrice = preparePrice(op)
-	scrapeData.DiscountPrice = preparePrice(dp)
-
-	// log.Println("Jd.id product data:")
-	// log.Println("name:", scrapeData.Name)
-	// log.Println("original price:", scrapeData.OriginalPrice)
-	// log.Println("discount price:", scrapeData.DiscountPrice)
-
-	return scrapeData
-}
-
-// scrape HTML using colly
-func ScrapeHtml(url string, selector map[string]string) {
-	c := colly.NewCollector(
-		colly.MaxDepth(1),
-	)
-
-	c.OnHTML("*", func(e *colly.HTMLElement) {
-		fmt.Println(e.Text)
-		os.Exit(1)
-	})
-
-	// setting up selector
-	if selector["name"] != "" {
-		c.OnHTML(selector["name"], func(e *colly.HTMLElement) {
-			// Print link
-			fmt.Println("Name found:" + e.Text)
-			// Visit link found on page
-			// Only those links are visited which are in AllowedDomains
-		})
-
-	}
-
-	// Before making a request print "Visiting ..."
-	c.OnRequest(func(r *colly.Request) {
-		fmt.Println("Visiting", r.URL.String())
-	})
-
-	c.OnError(func(_ *colly.Response, err error) {
-		log.Println("Something went wrong:", err)
-	})
-
-	c.Visit(url)
-	// scraper = c
 }
 
 // remove usual addition in price text scraped from web and convert it to int
@@ -155,14 +71,14 @@ func preparePrice(price string) int {
 	return priceInt
 }
 
-func compareScrapedData(currentData *db.Item, scrapeData ScrapeData){
+func compareScrapedData(currentData *db.Item, scrapeData ScrapeData) {
 	log.Println(currentData)
 	log.Println(scrapeData)
 
 	// set lowest price
-	if currentData.LowestPrice == nil{
+	if currentData.LowestPrice == nil {
 		currentData.LowestPrice = &scrapeData.DiscountPrice
-	}else if *currentData.LowestPrice > scrapeData.DiscountPrice{
+	} else if *currentData.LowestPrice > scrapeData.DiscountPrice {
 		currentData.LowestPrice = &scrapeData.DiscountPrice
 	}
 
@@ -178,7 +94,18 @@ func compareScrapedData(currentData *db.Item, scrapeData ScrapeData){
 	// 		priceTrend = "up"
 	// 	}
 	// }
-	
+
 	// set last price
 	currentData.LastPrice = &scrapeData.DiscountPrice
+
+	// set last discount percentage
+	ld := 100 - (scrapeData.DiscountPrice * 100 / scrapeData.OriginalPrice)
+	currentData.LastDiscount = &ld
+
+	// set lowest discount percentage
+	if currentData.LowestDiscount == nil{
+		currentData.LowestDiscount = currentData.LastDiscount
+	}else if *currentData.LowestDiscount > *currentData.LastDiscount{
+		currentData.LowestDiscount = currentData.LastDiscount
+	}
 }
