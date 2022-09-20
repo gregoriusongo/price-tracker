@@ -33,7 +33,10 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 
 		// wait for the page to load
 		chromedp.WaitVisible(selector["name"]),
-
+		chromedp.ActionFunc(func(context.Context) error {
+			log.Printf("Website loaded")
+			return nil
+		}),
 		// retrieve data
 		chromedp.Text(selector["name"], &scrapeData.Name),
 		chromedp.Text(selector["price"], &op),
