@@ -75,6 +75,8 @@ func compareScrapedData(currentData *db.Item, scrapeData ScrapeData) {
 	log.Println(currentData)
 	log.Println(scrapeData)
 
+	currentData.Name = scrapeData.Name
+
 	// set lowest price
 	if currentData.LowestPrice == nil {
 		currentData.LowestPrice = &scrapeData.DiscountPrice
