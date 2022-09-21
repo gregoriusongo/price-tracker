@@ -27,7 +27,7 @@ services:
     #   retries: 10
 
   headless-shell:
-    image: chromedp/headless-shell:latest
+    image: chromedp/headless-shell:105.0.5195.127
     init: true
     container_name: headless_chrome_shell
     restart: unless-stopped
