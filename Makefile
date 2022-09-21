@@ -1,10 +1,9 @@
-BINARY=engine
+BINARY=price-tracker
 test: 
 	go test -v -cover -covermode=atomic ./...
 
 engine:
-	go build -o ${BINARY} app/*.go
-
+	go build -o ${BINARY} cmd/*/*.go
 
 unittest:
 	go test -short  ./...
