@@ -4,18 +4,16 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: article_management_api
-    ports:
-      - 9090:9090
+    container_name: price_tracker
     depends_on:
-      mysql:
+      postgresql:
         condition: service_healthy
     volumes:
       - ./config.json:/app/config.json
 
-  mysql:
-    image: mysql:5.7 
-    container_name: go_clean_arch_mysql
+  postgresql:
+    image: postgres:14.5 
+    container_name: price_tracker_postgres
     command: mysqld --user=root
     volumes:
       - ./article.sql:/docker-entrypoint-initdb.d/init.sql
@@ -26,7 +24,7 @@ services:
       - MYSQL_USER=user
       - MYSQL_PASSWORD=password
       - MYSQL_ROOT_PASSWORD=root
-    healthcheck:
-      test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
-      timeout: 5s
-      retries: 10
+    # healthcheck:
+    #   test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
+    #   timeout: 5s
+    #   retries: 10
