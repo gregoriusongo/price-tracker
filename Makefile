@@ -12,7 +12,7 @@ clean:
 	if [ -f ${BINARY} ] ; then rm ${BINARY} ; fi
 
 docker:
-	docker build -t price-tracker .
+	docker build -t ${BINARY} .
 
 run:
 	docker-compose up --build -d
