@@ -27,4 +27,7 @@ lint-prepare:
 lint:
 	./bin/golangci-lint run ./...
 
+headless-shell:
+	docker run -d -p 9222:9222 --rm --name headless-shell --init chromedp/headless-shell
+
 .PHONY: clean install unittest build docker run stop vendor lint-prepare lint
