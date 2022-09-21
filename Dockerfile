@@ -8,7 +8,7 @@ WORKDIR /app
 
 COPY . .
 
-RUN make engine
+RUN make app
 
 # Distribution
 FROM alpine:latest
@@ -19,6 +19,6 @@ RUN apk update && apk upgrade && \
 
 WORKDIR /app 
 
-COPY --from=builder /app/engine /app
+COPY --from=builder /app/price-tracker /app
 
 CMD /app/engine
