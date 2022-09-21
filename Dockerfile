@@ -21,4 +21,4 @@ WORKDIR /app
 
 COPY --from=builder /app/price-tracker /app
 
-CMD /app/engine
+CMD /app/price-tracker

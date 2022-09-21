@@ -14,17 +14,22 @@ services:
   postgresql:
     image: postgres:14.5 
     container_name: price_tracker_postgres
-    command: mysqld --user=root
+    restart: unless-stopped 
     volumes:
       - ./article.sql:/docker-entrypoint-initdb.d/init.sql
     ports:
-      - 3306:3306
+      - 5432:5432
     environment:
-      - MYSQL_DATABASE=article
-      - MYSQL_USER=user
-      - MYSQL_PASSWORD=password
-      - MYSQL_ROOT_PASSWORD=root
+      - POSTGRES_PASSWORD=password
     # healthcheck:
     #   test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
     #   timeout: 5s
     #   retries: 10
+
+  headless-shell:
+    image: chromedp/headless-shell:latest
+    init: true
+    container_name: headless_chrome_shell
+    restart: unless-stopped
+    ports:
+      - 9222:9222
