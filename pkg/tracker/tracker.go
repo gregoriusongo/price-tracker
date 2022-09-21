@@ -19,6 +19,8 @@ type ScrapeData struct {
 }
 
 func Scrape() {
+	log.Println("starting app")
+	
 	items, err := item.GetAllItems()
 	if err != nil {
 		panic(err)
@@ -52,6 +54,8 @@ func scrapeSingleItem(item db.Item) ScrapeData {
 		selector["discountPrice"] = *item.DiscountPriceSelector
 	}
 
+
+	// ScrapeJsSiteUsingRod()
 	return ScrapeJsSite(item.Url, selector)
 }
 
@@ -98,7 +102,7 @@ func compareScrapedData(currentData *db.Item, scrapeData ScrapeData) {
 	// }
 
 	// set last price
-	currentData.LastPrice = &scrapeData.DiscountPrice
+	currentData.LastPrice = &scrapeData.DiscountPrice	
 
 	// set last discount percentage
 	ld := 100 - (scrapeData.DiscountPrice * 100 / scrapeData.OriginalPrice)
