@@ -44,7 +44,6 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
 	
-	// TODO tokopedia
 	var scrapeData ScrapeData
 	var op string
 	var dp string
@@ -57,9 +56,9 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 			return nil
 		}),
 		// wait for the page to load
-		chromedp.WaitVisible(selector["name"], chromedp.ByQuery),
-		chromedp.WaitVisible(selector["price"], chromedp.ByQuery),
-		chromedp.WaitVisible(selector["discountPrice"], chromedp.ByQuery),
+		chromedp.WaitVisible(selector["ready"], chromedp.ByQuery),
+		// chromedp.WaitVisible(selector["price"], chromedp.ByQuery),
+		// chromedp.WaitVisible(selector["discountPrice"], chromedp.ByQuery),
 		chromedp.ActionFunc(func(context.Context) error {
 			log.Printf("Website loaded")
 			return nil
@@ -69,7 +68,7 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 		// retrieve data
 		chromedp.Text(selector["name"], &scrapeData.Name),
 		chromedp.Text(selector["price"], &op),
-		chromedp.Text(selector["price"], &dp),
+		chromedp.Text(selector["discountPrice"], &dp),
 	)
 	if err != nil {
 		log.Panic(err)

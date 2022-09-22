@@ -54,6 +54,11 @@ func scrapeSingleItem(item db.Item) ScrapeData {
 		selector["discountPrice"] = *item.DiscountPriceSelector
 	}
 
+	if item.ReadySelector != nil {
+		selector["ready"] = *item.ReadySelector
+	}else{
+		selector["ready"] = *item.NameSelector
+	}
 
 	// ScrapeJsSiteUsingRod()
 	return ScrapeJsSite(item.Url, selector)

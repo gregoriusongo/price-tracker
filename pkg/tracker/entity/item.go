@@ -19,6 +19,7 @@ type Item struct {
 	LastDiscount          *int // in percentage
 	LowestDiscount        *int // in percentage
 	NameSelector          *string
+	ReadySelector         *string
 }
 
 type ItemService interface {
