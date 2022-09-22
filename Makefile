@@ -28,6 +28,9 @@ lint:
 	./bin/golangci-lint run ./...
 
 headless-shell:
-	docker run -d -p 9222:9222 --rm --name headless-shell --init chromedp/headless-shell
+	docker run -d -p 9222:9222 -m 800m --rm --name headless-shell --init chromedp/headless-shell
+
+docker-run:
+	docker run -d --rm -v ./config.json:/app/config.json --name price-tracker-shell --init price-tracker:latest
 
 .PHONY: clean install unittest build docker run stop vendor lint-prepare lint
