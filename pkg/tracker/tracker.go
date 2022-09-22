@@ -20,7 +20,7 @@ type ScrapeData struct {
 
 func Scrape() {
 	log.Println("starting app")
-	
+
 	items, err := item.GetAllItems()
 	if err != nil {
 		panic(err)
@@ -54,9 +54,13 @@ func scrapeSingleItem(item db.Item) ScrapeData {
 		selector["discountPrice"] = *item.DiscountPriceSelector
 	}
 
+	if item.SecondaryPriceSelector != nil {
+		selector["secondaryPrice"] = *item.SecondaryPriceSelector
+	}
+
 	if item.ReadySelector != nil {
 		selector["ready"] = *item.ReadySelector
-	}else{
+	} else {
 		selector["ready"] = *item.NameSelector
 	}
 
@@ -66,6 +70,11 @@ func scrapeSingleItem(item db.Item) ScrapeData {
 
 // remove usual addition in price text scraped from web and convert it to int
 func preparePrice(price string) int {
+	// empty string return 0
+	if price == "" {
+		return 0
+	}
+
 	price = strings.ReplaceAll(price, ",", "")
 	price = strings.ReplaceAll(price, ".", "")
 	price = strings.ReplaceAll(price, "Rp", "")
@@ -107,16 +116,22 @@ func compareScrapedData(currentData *db.Item, scrapeData ScrapeData) {
 	// }
 
 	// set last price
-	currentData.LastPrice = &scrapeData.DiscountPrice	
+	currentData.LastPrice = &scrapeData.DiscountPrice
 
 	// set last discount percentage
-	ld := 100 - (scrapeData.DiscountPrice * 100 / scrapeData.OriginalPrice)
+	var ld int
+	if scrapeData.OriginalPrice != 0 {
+		ld = 100 - (scrapeData.DiscountPrice * 100 / scrapeData.OriginalPrice)
+		} else {
+		// no discount
+		ld = 0
+	}
 	currentData.LastDiscount = &ld
 
 	// set lowest discount percentage
-	if currentData.LowestDiscount == nil{
+	if currentData.LowestDiscount == nil {
 		currentData.LowestDiscount = currentData.LastDiscount
-	}else if *currentData.LowestDiscount > *currentData.LastDiscount{
+	} else if *currentData.LowestDiscount > *currentData.LastDiscount {
 		currentData.LowestDiscount = currentData.LastDiscount
 	}
 }

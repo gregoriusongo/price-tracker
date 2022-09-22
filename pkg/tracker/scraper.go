@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"log"
 	"os"
@@ -13,18 +14,6 @@ import (
 
 // scrape js site using chromedp
 func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
-	
-		// opts := append(chromedp.DefaultExecAllocatorOptions[:],
-		// 	// chromedp.UserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.169 Safari/537.36"),
-		// 	chromedp.Headless,
-		// 	chromedp.DisableGPU,
-		// 	chromedp.NoDefaultBrowserCheck,
-		// 	chromedp.NoFirstRun,
-		// )
-
-	// allocCtx, cancel := chromedp.NewExecAllocator(context.Background(), opts...)
-	// defer cancel()
-
 	allocCtx, cancel := chromedp.NewRemoteAllocator(context.Background(), "ws://localhost:9222/")
 	defer cancel()
 
@@ -32,24 +21,26 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 	ctx, cancel := chromedp.NewContext(allocCtx)
 	defer cancel()
 
-	// if err := chromedp.Run(allocCtx); err != nil {
-	// 	log.Fatal(err)
-	// }
+	var scrapeData ScrapeData
+	var op string // original price for item with discount
+	var cp string // current price / discounted price
+	// var buf []byte
 
-	// if err := chromedp.Run(ctx); err != nil {
-	// 	log.Println("start:", err)
-	// }
-	
+	// start browser
+	if err := chromedp.Run(ctx); err != nil {
+		log.Panic(err)
+	}
+
 	// create a timeout
 	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
 	defer cancel()
-	
-	var scrapeData ScrapeData
-	var op string
-	var dp string
-	// var b string // debug purpose
 
-	err := chromedp.Run(ctx,
+	// load website
+	if err := chromedp.Run(ctx,
+		chromedp.ActionFunc(func(context.Context) error {
+			log.Printf("Chrome Started")
+			return nil
+		}),
 		chromedp.Navigate(url),
 		chromedp.ActionFunc(func(context.Context) error {
 			log.Printf("Waiting for website to load")
@@ -57,28 +48,46 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 		}),
 		// wait for the page to load
 		chromedp.WaitVisible(selector["ready"], chromedp.ByQuery),
-		// chromedp.WaitVisible(selector["price"], chromedp.ByQuery),
-		// chromedp.WaitVisible(selector["discountPrice"], chromedp.ByQuery),
 		chromedp.ActionFunc(func(context.Context) error {
 			log.Printf("Website loaded")
 			return nil
 		}),
-		// chromedp.Text(`body`, &b),
-
-		// retrieve data
-		chromedp.Text(selector["name"], &scrapeData.Name),
-		chromedp.Text(selector["price"], &op),
-		chromedp.Text(selector["discountPrice"], &dp),
-	)
-	if err != nil {
+		// chromedp.FullScreenshot(&buf, 90),
+	); err != nil {
+		chromedp.Cancel(ctx)
 		log.Panic(err)
+	}
+
+	// get the data
+	if err := chromedp.Run(ctx,
+		// retrieve data
+		RunWithTimeOut(&ctx, 1, chromedp.Tasks{
+			chromedp.Text(selector["name"], &scrapeData.Name, chromedp.ByQuery),
+			chromedp.Text(selector["price"], &op, chromedp.ByQuery),
+			chromedp.Text(selector["discountPrice"], &cp, chromedp.ByQuery),
+		}),
+	); errors.Is(err, context.DeadlineExceeded) {
+		log.Println("timeout exceed")
+	} else if err != nil {
+		chromedp.Cancel(ctx)
+		log.Panic(err)
+	}
+
+	// no price and discounted price retrived
+	// try getting secondary price
+	if op == "" {
+		if err := chromedp.Run(ctx,
+			chromedp.Text(selector["secondaryPrice"], &cp, chromedp.ByQuery),
+		); err != nil {
+			chromedp.Cancel(ctx)
+			log.Panic(err)
+		}
 	}
 
 	// remove unused char from string
 	scrapeData.OriginalPrice = preparePrice(op)
-	scrapeData.DiscountPrice = preparePrice(dp)
+	scrapeData.DiscountPrice = preparePrice(cp)
 
-	// log.Println("Jd.id product data:")
 	log.Println("name:", scrapeData.Name)
 	log.Println("original price:", scrapeData.OriginalPrice)
 	log.Println("discount price:", scrapeData.DiscountPrice)
@@ -86,15 +95,7 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 	return scrapeData
 }
 
-// // scrape js site using rod
-// func ScrapeJsSiteUsingRod() {
-	
-// 	u := launcher.New().Leakless(false).MustLaunch()
-// 	page := rod.New().ControlURL(u).MustConnect().MustPage("https://www.tokopedia.com/retela-1/minyak-tawon-dd-30-ml")
-//     page.MustWaitLoad().MustScreenshot("a.png")
-// }
-
-// scrape HTML using colly
+// scrape HTML using colly (not finished)
 func ScrapeHtml(url string, selector map[string]string) {
 	c := colly.NewCollector(
 		colly.MaxDepth(1),
@@ -111,7 +112,6 @@ func ScrapeHtml(url string, selector map[string]string) {
 			// Print link
 			fmt.Println("Name found:" + e.Text)
 			// Visit link found on page
-			// Only those links are visited which are in AllowedDomains
 		})
 
 	}
@@ -127,4 +127,12 @@ func ScrapeHtml(url string, selector map[string]string) {
 
 	c.Visit(url)
 	// scraper = c
+}
+
+func RunWithTimeOut(ctx *context.Context, timeout time.Duration, tasks chromedp.Tasks) chromedp.ActionFunc {
+	return func(ctx context.Context) error {
+		timeoutContext, cancel := context.WithTimeout(ctx, timeout*time.Second)
+		defer cancel()
+		return tasks.Do(timeoutContext)
+	}
 }

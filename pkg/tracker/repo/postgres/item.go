@@ -15,7 +15,7 @@ func (i Item) GetAllItems() (items []Item, err error) {
 	ctx := context.Background()
 
 	query := `
-	SELECT i.id, i.name, i.url, last_price, lowest_price, last_discount, lowest_discount, status, e.site_url as ecommerce_url, e.name as ecommerce_name, e.discount_price_selector, e.original_price_selector, e.name_selector, e.ready_selector, i.date_created
+	SELECT i.id, i.name, i.url, last_price, lowest_price, last_discount, lowest_discount, status, e.site_url as ecommerce_url, e.name as ecommerce_name, e.discount_price_selector, e.original_price_selector, e.name_selector, e.ready_selector, e.secondary_price_selector, i.date_created
 	FROM item i
 	JOIN ecommerce e on i.ecommerce_id = e.id
 	WHERE i.deleted_at is NULL and e.deleted_at is NULL
