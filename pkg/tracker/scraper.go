@@ -13,7 +13,9 @@ import (
 )
 
 // scrape js site using chromedp
-func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
+func ScrapeJsSite(url string, selector map[string]string) (ScrapeData, error) {
+	log.Println(url)
+
 	allocCtx, cancel := chromedp.NewRemoteAllocator(context.Background(), "ws://localhost:9222/")
 	defer cancel()
 
@@ -55,7 +57,8 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 		// chromedp.FullScreenshot(&buf, 90),
 	); err != nil {
 		chromedp.Cancel(ctx)
-		log.Panic(err)
+		return scrapeData, err
+		// log.Panic(err)
 	}
 
 	// get the data
@@ -67,32 +70,37 @@ func ScrapeJsSite(url string, selector map[string]string) ScrapeData {
 			chromedp.Text(selector["discountPrice"], &cp, chromedp.ByQuery),
 		}),
 	); errors.Is(err, context.DeadlineExceeded) {
-		log.Println("timeout exceed")
+		log.Println("timeout exceed (discount price)")
 	} else if err != nil {
 		chromedp.Cancel(ctx)
-		log.Panic(err)
+		return scrapeData, err
+		// log.Panic(err)
 	}
 
 	// no price and discounted price retrived
 	// try getting secondary price
-	if op == "" {
+	if cp == "" {
 		if err := chromedp.Run(ctx,
 			chromedp.Text(selector["secondaryPrice"], &cp, chromedp.ByQuery),
 		); err != nil {
 			chromedp.Cancel(ctx)
-			log.Panic(err)
+			return scrapeData, err
+			// log.Panic(err)
 		}
+
+		// this item have no discount, so set same price
+		op = cp
 	}
 
 	// remove unused char from string
 	scrapeData.OriginalPrice = preparePrice(op)
 	scrapeData.DiscountPrice = preparePrice(cp)
 
-	log.Println("name:", scrapeData.Name)
-	log.Println("original price:", scrapeData.OriginalPrice)
-	log.Println("discount price:", scrapeData.DiscountPrice)
+	// log.Println("name:", scrapeData.Name)
+	// log.Println("original price:", scrapeData.OriginalPrice)
+	// log.Println("discount price:", scrapeData.DiscountPrice)
 
-	return scrapeData
+	return scrapeData, nil
 }
 
 // scrape HTML using colly (not finished)

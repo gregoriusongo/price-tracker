@@ -1,6 +1,8 @@
 package tracker
 
 import (
+	"context"
+	"errors"
 	"log"
 	"strconv"
 	"strings"
@@ -26,20 +28,29 @@ func Scrape() {
 		panic(err)
 	}
 
+	// TODO init browser once only
 	for _, item := range items {
 		// get current item data
-		scrapeData := scrapeSingleItem(item)
+		scrapeData, err := scrapeSingleItem(item)
+		if errors.Is(err, context.DeadlineExceeded){
+			log.Println("timeout")
+		}else if err != nil{
+			log.Panic("unexpected error")
+		}else{
+			// compare data to get the updated data set
+			compareScrapedData(&item, scrapeData)
+	
+			// update database
+			if err := item.UpdateitemAfterTrack(); err != nil {
+				log.Panic(err)
+			}
+		}
 
-		// compare data to get the updated data set
-		compareScrapedData(&item, scrapeData)
-		// log.Println(item)
-		item.UpdateitemAfterTrack()
-
-		// update database
 	}
+
 }
 
-func scrapeSingleItem(item db.Item) ScrapeData {
+func scrapeSingleItem(item db.Item) (ScrapeData, error) {
 	var selector = map[string]string{}
 
 	if item.NameSelector != nil {
@@ -90,10 +101,14 @@ func preparePrice(price string) int {
 }
 
 func compareScrapedData(currentData *db.Item, scrapeData ScrapeData) {
-	log.Println(currentData)
-	log.Println(scrapeData)
+	// log.Println(currentData)
+	// log.Println(scrapeData)
 
 	currentData.Name = scrapeData.Name
+
+	if scrapeData.OriginalPrice == 0 {
+		scrapeData.OriginalPrice = scrapeData.DiscountPrice
+	}
 
 	// set lowest price
 	if currentData.LowestPrice == nil {
@@ -122,16 +137,16 @@ func compareScrapedData(currentData *db.Item, scrapeData ScrapeData) {
 	var ld int
 	if scrapeData.OriginalPrice != 0 {
 		ld = 100 - (scrapeData.DiscountPrice * 100 / scrapeData.OriginalPrice)
-		} else {
+	} else {
 		// no discount
 		ld = 0
 	}
 	currentData.LastDiscount = &ld
 
 	// set lowest discount percentage
-	if currentData.LowestDiscount == nil {
-		currentData.LowestDiscount = currentData.LastDiscount
-	} else if *currentData.LowestDiscount > *currentData.LastDiscount {
-		currentData.LowestDiscount = currentData.LastDiscount
+	if currentData.HighestDiscount == nil {
+		currentData.HighestDiscount = currentData.LastDiscount
+	} else if *currentData.HighestDiscount < *currentData.LastDiscount {
+		currentData.HighestDiscount = currentData.LastDiscount
 	}
 }

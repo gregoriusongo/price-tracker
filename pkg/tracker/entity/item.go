@@ -18,7 +18,7 @@ type Item struct {
 	OriginalPriceSelector  *string
 	SecondaryPriceSelector *string // for item without discount and different page
 	LastDiscount           *int    // in percentage
-	LowestDiscount         *int    // in percentage
+	HighestDiscount        *int    // in percentage
 	NameSelector           *string
 	ReadySelector          *string
 }
