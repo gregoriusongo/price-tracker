@@ -12,16 +12,31 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+// var mainCtx context.Context
+
+// func initChromedp(){
+// 	allocCtx, _ := chromedp.NewRemoteAllocator(context.Background(), "ws://localhost:9222/")
+// 	// defer cancel()
+
+// 	mainCtx, _ = chromedp.NewContext(allocCtx)
+// 	// defer cancel()
+
+// 	// start browser
+// 	if err := chromedp.Run(mainCtx); err != nil {
+// 		log.Panic(err)
+// 	}
+// }
+
 // scrape js site using chromedp
 func ScrapeJsSite(url string, selector map[string]string) (ScrapeData, error) {
 	log.Println(url)
 
-	allocCtx, cancel := chromedp.NewRemoteAllocator(context.Background(), "ws://localhost:9222/")
-	defer cancel()
+	// allocCtx, cancel := chromedp.NewRemoteAllocator(context.Background(), "ws://localhost:9222/")
+	// defer cancel()
 
 	// ctx, cancel := chromedp.NewContext(allocCtx, chromedp.WithDebugf(log.Printf))
-	ctx, cancel := chromedp.NewContext(allocCtx)
-	defer cancel()
+	// ctx, cancel := chromedp.NewContext(allocCtx)
+	// defer cancel()
 
 	var scrapeData ScrapeData
 	var op string // original price for item with discount
@@ -29,12 +44,22 @@ func ScrapeJsSite(url string, selector map[string]string) (ScrapeData, error) {
 	// var buf []byte
 
 	// start browser
-	if err := chromedp.Run(ctx); err != nil {
+	// if err := chromedp.Run(ctx); err != nil {
+	// 	log.Panic(err)
+	// }
+	allocCtx, _ := chromedp.NewRemoteAllocator(context.Background(), "ws://localhost:9222/")
+	// defer cancel()
+
+	mainCtx, _ := chromedp.NewContext(allocCtx)
+	// defer cancel()
+
+	// start browser
+	if err := chromedp.Run(mainCtx); err != nil {
 		log.Panic(err)
 	}
 
 	// create a timeout
-	ctx, cancel = context.WithTimeout(ctx, 10*time.Second)
+	ctx, cancel := context.WithTimeout(mainCtx, 10*time.Second)
 	defer cancel()
 
 	// load website

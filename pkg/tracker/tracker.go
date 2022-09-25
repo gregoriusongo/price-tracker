@@ -29,13 +29,15 @@ func Scrape() {
 	}
 
 	// TODO init browser once only
+	// initChromedp()
+
 	for _, item := range items {
 		// get current item data
 		scrapeData, err := scrapeSingleItem(item)
 		if errors.Is(err, context.DeadlineExceeded){
 			log.Println("timeout")
 		}else if err != nil{
-			log.Panic("unexpected error")
+			log.Panic(err)
 		}else{
 			// compare data to get the updated data set
 			compareScrapedData(&item, scrapeData)
