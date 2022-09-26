@@ -31,6 +31,7 @@ import (
 func ScrapeJsSite(url string, selector map[string]string) (ScrapeData, error) {
 	log.Println(url)
 
+	// TODO tidy this "maybe will be used" code
 	// allocCtx, cancel := chromedp.NewRemoteAllocator(context.Background(), "ws://localhost:9222/")
 	// defer cancel()
 

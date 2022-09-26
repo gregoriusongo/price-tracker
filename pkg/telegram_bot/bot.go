@@ -1,10 +1,15 @@
 package telegram_bot
 
 import (
+	"log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 )
 
-func Start() {
+// var updates tgbotapi.UpdatesChannel
+// var bot *tgbotapi.BotAPI
+
+func StartListening() {
 	bot, err := tgbotapi.NewBotAPI("5766052528:AAEJKyW2y4ERCwV7uheqpBwl8J6hIUwmMy4")
 	if err != nil {
 		panic(err)
@@ -12,6 +17,7 @@ func Start() {
 
 	bot.Debug = true
 
+	// TODO remove comment from the template
 	// Create a new UpdateConfig struct with an offset of 0. Offsets are used
 	// to make sure Telegram knows we've handled previous values and we don't
 	// need them repeated.
@@ -34,22 +40,44 @@ func Start() {
 			continue
 		}
 
+		if !update.Message.IsCommand() { // ignore any non-command Messages
+			continue
+		}
+
 		// Now that we know we've gotten a new message, we can construct a
 		// reply! We'll take the Chat ID and Text from the incoming message
 		// and use it to create a new message.
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
 		// We'll also say that this message is a reply to the previous message.
 		// For any other specifications than Chat ID or Text, you'll need to
 		// set fields on the `MessageConfig`.
-		msg.ReplyToMessageID = update.Message.MessageID
+		// msg.ReplyToMessageID = update.Message.MessageID
+		log.Println(update.Message.Chat.ID)
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
-		// Okay, we're sending our message off! We don't care about the message
-		// we just sent, so we'll discard it.
+		// Extract the command from the Message.
+		switch update.Message.Command() {
+		case "help":
+			msg.Text = "Hi, this is ecommerce price tracker bot. You can start by using /register and then add your item with /additem"
+		case "register":
+			msg.Text = Register(update)
+		case "activate":
+			msg.Text = Activate(update.Message.Chat.ID)
+		case "deactivate":
+			msg.Text = Deactivate(update.Message.Chat.ID)
+		case "additem":
+			msg.Text = "Adding your item."
+		case "deleteitem":
+			msg.Text = "Deleting your item."
+		case "myitem":
+			msg.Text = "Here's your followed item."
+		default:
+			msg.Text = "I don't know that command"
+		}
+
+		// TODO handle when telegram or network down
 		if _, err := bot.Send(msg); err != nil {
-			// Note that panics are a bad way to handle errors. Telegram can
-			// have service outages or network errors, you should retry sending
-			// messages or more gracefully handle failures.
-			panic(err)
+			log.Fatal(err)
 		}
 	}
 }

@@ -5,5 +5,6 @@ import (
 )
 
 func main() {
-	telegram_bot.Start()
+	// telegram_bot.InitBot()
+	telegram_bot.StartListening()
 }
