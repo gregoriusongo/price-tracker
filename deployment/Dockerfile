@@ -6,16 +6,14 @@ RUN apk update && apk upgrade && \
 
 WORKDIR /app
 
-COPY . .
+COPY ../ .
 
 RUN make app
 
 # Distribution
-FROM alpine:latest
+FROM chromedp/headless-shell:105.0.5195.127
 
-RUN apk update && apk upgrade && \
-    apk --update --no-cache add tzdata && \
-    mkdir /app 
+RUN mkdir /app 
 
 WORKDIR /app 
 
