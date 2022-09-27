@@ -72,7 +72,7 @@ func StartListening() {
 		case "myitem":
 			msg.Text = "Here's your followed item."
 		default:
-			msg.Text = "I don't know that command"
+			msg.Text = "I don't know that command, try /help"
 		}
 
 		// TODO handle when telegram or network down
