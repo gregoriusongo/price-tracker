@@ -12,6 +12,7 @@ type Item struct {
 	LowestPrice            *int
 	Status                 int8
 	DateCreated            time.Time
+	EcommerceID            int8
 	EcommerceUrl           string
 	EcommerceName          string
 	DiscountPriceSelector  *string

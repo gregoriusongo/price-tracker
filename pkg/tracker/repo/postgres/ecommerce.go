@@ -11,8 +11,7 @@ type Ecommerce entity.Ecommerce
 
 type EcommerceService entity.EcommerceService
 
-
-func (ecommerce Ecommerce) GetAllEcommerce() (ecommerces []Ecommerce, err error)  {
+func (ecommerce Ecommerce) GetAllEcommerce() (ecommerces []Ecommerce, err error) {
 	ctx := context.Background()
 
 	query := `
