@@ -46,7 +46,7 @@ func StartListening() {
 		// log.Println(update.Message.Chat.ID)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
-		// check user bot state
+		// get user bot state
 		err, state := GetIDState(update.Message.Chat.ID)
 		if err != nil {
 			msg.Text = "Encountered error."
@@ -54,7 +54,9 @@ func StartListening() {
 
 		if state == 0 {
 			// home
-			if !update.Message.IsCommand() { // ignore any non-command Messages
+			
+			if !update.Message.IsCommand() { 
+				// ignore any non-command Messages
 				msg.Text = "I don't know that command, try /help"
 			}
 
