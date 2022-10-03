@@ -7,13 +7,15 @@ import (
 )
 
 type Ecommerce struct {
-	ID                    int64
-	Name                  string
-	SiteUrl               string
-	DiscountPriceSelector string
-	OriginalPriceSelector string
-	NameSelector          string
-	DateCreated           time.Time
+	ID                     int64
+	Name                   string
+	SiteUrl                string
+	DiscountPriceSelector  string
+	OriginalPriceSelector  string
+	NameSelector           string
+	ReadySelector          string
+	SecondaryPriceSelector string
+	DateCreated            time.Time
 }
 
 type EcommerceService interface {
