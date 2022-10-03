@@ -4,13 +4,19 @@ import (
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
+	"github.com/gregoriusongo/price-tracker/pkg/util"
 )
 
 // var updates tgbotapi.UpdatesChannel
 // var bot *tgbotapi.BotAPI
 
 func StartListening() {
-	bot, err := tgbotapi.NewBotAPI("token")
+	config, err := util.LoadConfig()
+	if err != nil {
+		log.Fatal("cannot load config:", err)
+	}
+	
+	bot, err := tgbotapi.NewBotAPI(config.TelegramBot.Token)
 	if err != nil {
 		panic(err)
 	}
