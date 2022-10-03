@@ -1,0 +1,13 @@
+{
+  "debug": true,
+  "database": {
+    "host": "localhost",
+    "port": "5432",
+    "user": "postgres",
+    "pass": "example",
+    "name": "price_tracker"
+  },
+  "telegram_bot": {
+    "token": "telegram_bot_token"
+  }
+}

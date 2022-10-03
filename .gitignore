@@ -21,6 +21,7 @@
 !Dockerfile
 
 !Makefile
+!*.example
 
 # ...even if they are in subdirectories
 !*/
