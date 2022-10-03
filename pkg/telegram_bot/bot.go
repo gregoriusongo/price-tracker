@@ -10,7 +10,7 @@ import (
 // var bot *tgbotapi.BotAPI
 
 func StartListening() {
-	bot, err := tgbotapi.NewBotAPI("5766052528:AAEJKyW2y4ERCwV7uheqpBwl8J6hIUwmMy4")
+	bot, err := tgbotapi.NewBotAPI("token")
 	if err != nil {
 		panic(err)
 	}
@@ -23,9 +23,6 @@ func StartListening() {
 	// need them repeated.
 	updateConfig := tgbotapi.NewUpdate(0)
 
-	// Tell Telegram we should wait up to 30 seconds on each request for an
-	// update. This way we can get information just as quickly as making many
-	// frequent requests without having to send nearly as many.
 	updateConfig.Timeout = 30
 
 	// Start polling Telegram for updates.
@@ -43,15 +40,7 @@ func StartListening() {
 		if !update.Message.IsCommand() { // ignore any non-command Messages
 			continue
 		}
-
-		// Now that we know we've gotten a new message, we can construct a
-		// reply! We'll take the Chat ID and Text from the incoming message
-		// and use it to create a new message.
-		// msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
-		// We'll also say that this message is a reply to the previous message.
-		// For any other specifications than Chat ID or Text, you'll need to
-		// set fields on the `MessageConfig`.
-		// msg.ReplyToMessageID = update.Message.MessageID
+		
 		log.Println(update.Message.Chat.ID)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
@@ -66,11 +55,18 @@ func StartListening() {
 		case "deactivate":
 			msg.Text = Deactivate(update.Message.Chat.ID)
 		case "additem":
-			msg.Text = "Adding your item."
+			log.Println(update.Message)
+			msg.Text = SaveItem(update.Message.Chat.ID, update.Message.Text)
 		case "deleteitem":
 			msg.Text = "Deleting your item."
 		case "myitem":
-			msg.Text = "Here's your followed item."
+			msg.Text = GetItemList(update.Message.Chat.ID)
+		// case "test1":
+		// 	msg.Text = "ok"
+		// 	msg.ReplyMarkup = numericKeyboard
+		// case "test2":
+		// 	msg.Text = "ok"
+		// 	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
 		default:
 			msg.Text = "I don't know that command, try /help"
 		}
