@@ -15,7 +15,7 @@ func StartListening() {
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
-	
+
 	bot, err := tgbotapi.NewBotAPI(config.TelegramBot.Token)
 	if err != nil {
 		panic(err)
@@ -43,38 +43,58 @@ func StartListening() {
 			continue
 		}
 
-		if !update.Message.IsCommand() { // ignore any non-command Messages
-			continue
-		}
-		
-		log.Println(update.Message.Chat.ID)
+		// log.Println(update.Message.Chat.ID)
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
-		// Extract the command from the Message.
-		switch update.Message.Command() {
-		case "help":
-			msg.Text = "Hi, this is ecommerce price tracker bot. You can start by using /register and then add your item with /additem"
-		case "register":
-			msg.Text = Register(update)
-		case "activate":
-			msg.Text = Activate(update.Message.Chat.ID)
-		case "deactivate":
-			msg.Text = Deactivate(update.Message.Chat.ID)
-		case "additem":
-			log.Println(update.Message)
-			msg.Text = SaveItem(update.Message.Chat.ID, update.Message.Text)
-		case "deleteitem":
-			msg.Text = "Deleting your item."
-		case "myitem":
-			msg.Text = GetItemList(update.Message.Chat.ID)
-		// case "test1":
-		// 	msg.Text = "ok"
-		// 	msg.ReplyMarkup = numericKeyboard
-		// case "test2":
-		// 	msg.Text = "ok"
-		// 	msg.ReplyMarkup = tgbotapi.NewRemoveKeyboard(true)
-		default:
-			msg.Text = "I don't know that command, try /help"
+		// check user bot state
+		err, state := GetIDState(update.Message.Chat.ID)
+		if err != nil {
+			msg.Text = "Encountered error."
+		}
+
+		if state == 0 {
+			// home
+			if !update.Message.IsCommand() { // ignore any non-command Messages
+				msg.Text = "I don't know that command, try /help"
+			}
+
+			// Extract the command from the Message.
+			switch update.Message.Command() {
+			case "help":
+				msg.Text = "Hi, this is ecommerce price tracker bot. You can start by using /register and then add your item with /additem"
+			case "register":
+				msg.Text = Register(update)
+			case "activate":
+				msg.Text = Activate(update.Message.Chat.ID)
+			case "deactivate":
+				msg.Text = Deactivate(update.Message.Chat.ID)
+			case "additem":
+				msg.Text = SetStateAddItem(update.Message.Chat.ID)
+			case "deleteitem":
+				msg.Text = SetStateDeleteItem(update.Message.Chat.ID)
+			case "myitem":
+				msg.Text = GetItemList(update.Message.Chat.ID)
+			case "done":
+				msg.Text = SetStateHome(update.Message.Chat.ID)
+			default:
+				msg.Text = "I don't know that command, try /help"
+			}
+		} else if state == 1 {
+			// add item command
+			switch update.Message.Command() {
+			case "done":
+				msg.Text = SetStateHome(update.Message.Chat.ID)
+			default:
+				msg.Text = "Adding item"
+			}
+		} else if state == 2 {
+			// delete item command
+			switch update.Message.Command() {
+			case "done":
+				msg.Text = SetStateHome(update.Message.Chat.ID)
+			default:
+				msg.Text = "Deleting item"
+			}
 		}
 
 		// TODO handle when telegram or network down

@@ -13,7 +13,7 @@ func (t TChat) GetAllTelegramChats() (chats []TChat, err error) {
 	ctx := context.Background()
 
 	query := `
-	SELECT t.id, t.chat_id, t.first_name, t.last_name, t.username, t.date_created
+	SELECT t.id, t.chat_id, t.first_name, t.last_name, t.username, t.state, t.date_created
 	FROM telegram t
 	WHERE deleted_at is null
 	`
@@ -28,7 +28,7 @@ func (data *TChat) SelectByID(id int64) error {
 	ctx := context.Background()
 
 	query := `
-	SELECT t.id, t.chat_id, t.first_name, t.last_name, t.username, t.date_created
+	SELECT t.id, t.chat_id, t.first_name, t.last_name, t.username, t.state, t.date_created
 	FROM telegram t
 	WHERE t.chat_id = $1 AND deleted_at is null
 	LIMIT 1
@@ -57,6 +57,26 @@ func (data TChat) RegisterChat() error {
 	`
 
 	_, err := dbpool.Exec(ctx, query, data.ChatID, data.FirstName, data.LastName, data.Username)
+
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// update telegram chat id state
+func (data TChat) SetIDState( state int) error {
+	ctx := context.Background()
+
+	query := `
+	UPDATE telegram i
+	SET state = $1
+	WHERE chat_id = $2
+	AND deleted_at is null
+	`
+
+	_, err := dbpool.Exec(ctx, query, state, data.ChatID)
 
 	if err != nil {
 		return err

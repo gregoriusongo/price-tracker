@@ -3,12 +3,11 @@ package entity
 import "time"
 
 type TelegramChat struct {
-	ID     *int
-	ChatID int64
-	// UserID    int
-	FirstName string
-	LastName  *string
-	Username  string
-	// ReceiveUpdate int
+	ID          *int
+	ChatID      int64
+	FirstName   string
+	LastName    *string
+	Username    string
+	State       int
 	DateCreated *time.Time
 }
