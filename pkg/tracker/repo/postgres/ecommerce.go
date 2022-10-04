@@ -15,9 +15,9 @@ func (ecommerce Ecommerce) GetAllEcommerce() (ecommerces []Ecommerce, err error)
 	ctx := context.Background()
 
 	query := `
-	SELECT e.id, e.name, e.site_url, e.discount_price_selector, e.original_price_selector, e.name_selector, e.ready_selector, e.secondary_price_selector, e.date_created
-	FROM ecommerce e
-	WHERE and e.deleted_at is NULL
+	SELECT id, name, site_url, discount_price_selector, original_price_selector, name_selector, ready_selector, secondary_price_selector, date_created
+	FROM ecommerce
+	WHERE deleted_at is NULL
 	`
 
 	err = pgxscan.Select(ctx, dbpool, &ecommerces, query)

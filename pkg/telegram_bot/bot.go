@@ -54,7 +54,7 @@ func StartListening() {
 
 		if state == 0 {
 			// home
-			
+
 			if !update.Message.IsCommand() { 
 				// ignore any non-command Messages
 				msg.Text = "I don't know that command, try /help"
@@ -87,7 +87,7 @@ func StartListening() {
 			case "done":
 				msg.Text = SetStateHome(update.Message.Chat.ID)
 			default:
-				msg.Text = "Adding item"
+				msg.Text = SaveItem(update.Message.Chat.ID, update.Message.Text)
 			}
 		} else if state == 2 {
 			// delete item command

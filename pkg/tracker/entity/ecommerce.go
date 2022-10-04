@@ -13,8 +13,8 @@ type Ecommerce struct {
 	DiscountPriceSelector  string
 	OriginalPriceSelector  string
 	NameSelector           string
-	ReadySelector          string
-	SecondaryPriceSelector string
+	ReadySelector          *string
+	SecondaryPriceSelector *string
 	DateCreated            time.Time
 }
 

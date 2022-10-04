@@ -2,9 +2,11 @@ package telegram_bot
 
 import (
 	"log"
+	"net/url"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
 	"github.com/gregoriusongo/price-tracker/pkg/telegram_bot/repo/postgres"
+	"github.com/gregoriusongo/price-tracker/pkg/tracker"
 )
 
 // get telegram chat state
@@ -29,33 +31,33 @@ func setState(chatID int64, state int) error {
 		ChatID: chatID,
 	}
 
-	err := tc.SetIDState(state);
+	err := tc.SetIDState(state)
 	return err
 }
 
 // set telegram chat id state to 0
 func SetStateHome(chatID int64) string {
-	if err := setState(chatID, 0); err != nil{
+	if err := setState(chatID, 0); err != nil {
 		return "Encountered error"
-	}else{
+	} else {
 		return "OK."
 	}
 }
 
 // set telegram chat id state to 1 (add item)
-func SetStateAddItem(chatID int64) string{
-	if err := setState(chatID, 1); err != nil{
+func SetStateAddItem(chatID int64) string {
+	if err := setState(chatID, 1); err != nil {
 		return "Encountered error"
-	}else{
+	} else {
 		return "OK, send me the url that you want to track, if you done, send me /done."
 	}
 }
 
 // set telegram chat id state to 2 (delete item)
-func SetStateDeleteItem(chatID int64) string{
-	if err := setState(chatID, 2); err != nil{
+func SetStateDeleteItem(chatID int64) string {
+	if err := setState(chatID, 2); err != nil {
 		return "Encountered error"
-	}else{
+	} else {
 		return "OK, send me the url that you want to stop tracking, if you done, send me /done."
 	}
 }
@@ -118,10 +120,30 @@ func Deactivate(chatID int64) string {
 	}
 }
 
-func SaveItem(chatID int64, url string) string {
-	log.Println(url)
+// add item to telegram id
+func SaveItem(chatID int64, productUrl string) string {
+	// TODO add url checking
+	_, err := url.Parse(productUrl)
+	if err != nil {
+		return "invalid url"
+	}
 
-	return "ok"
+	// insert product to db
+	id, err := tracker.InsertUrl(productUrl);
+	if err != nil {
+		log.Println(err)
+
+		if err.Error() == "not supported"{
+			return "Link not supported"
+		}
+
+		return "Failed to save item"
+	}
+	log.Println(id)
+
+	// track this item
+
+	return "OK"
 }
 
 // TODO finish this function

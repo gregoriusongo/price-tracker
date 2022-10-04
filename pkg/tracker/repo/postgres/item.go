@@ -70,21 +70,18 @@ func (i Item) Deleteitem(id int) error {
 }
 
 // insert new unscraped item
-func (i Item) InsertBlankItem() error {
+func (i Item) InsertBlankItem() (id int, err error) {
 	ctx := context.Background()
 
 	query := `
 	INSERT INTO item (url, ecommerce_id)
 	VALUES ($1, $2)
+	RETURNING id
 	`
 
-	_, err := dbpool.Exec(ctx, query, i.Url, i.EcommerceID)
+	err = dbpool.QueryRow(ctx, query, i.Url, i.EcommerceID).Scan(&id)
 
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return
 }
 
 // func (item *Item) GetItemById(id int64) (*Item, *gorm.DB) {

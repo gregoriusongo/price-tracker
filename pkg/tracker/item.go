@@ -9,17 +9,17 @@ import (
 
 var ecommerce db.Ecommerce
 
-// insert product url
-func InsertUrl(url string) error{
+// insert product url, if product already exist, return it's id
+func InsertUrl(url string) (id int64, err error){
 	// get all ecommerce urls
 	ecommerces, err := ecommerce.GetAllEcommerce()
 	if err != nil{
-		return err
+		return 
 	}
 
 	if len(ecommerces) == 0{
 		// no data
-		return errors.New("no ecommerce data found")
+		return 0, errors.New("no ecommerce data found")
 	}
 
 	var i db.Item
@@ -33,12 +33,12 @@ func InsertUrl(url string) error{
 	}
 	
 	if i.EcommerceID == 0{
-		return errors.New("not supported")
+		return 0, errors.New("not supported")
 	}
 
 	if err := i.InsertBlankItem(); err != nil{
-		return err
+		return 0, err
 	}
 
-	return nil
+	return id, err
 }
