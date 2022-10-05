@@ -128,7 +128,6 @@ func SaveItem(chatID int64, productUrl string) string {
 	if err != nil {
 		return "invalid url"
 	}
-	log.Println(url)
 
 	// start db transaction
 	ctx := context.Background()
@@ -145,14 +144,12 @@ func SaveItem(chatID int64, productUrl string) string {
 		return "Unexpected error"
 	} else if itemId != 0 {
 		// item found
-		log.Println(itemId)
 	} else {
 		// item doesnt exist
 		// insert product to db
 		itemId, err = tracker.InsertUrl(url)
 		if err != nil {
 			tx.Rollback(ctx)
-			log.Println(err)
 
 			if err.Error() == "not supported" {
 				return "Link not supported"
