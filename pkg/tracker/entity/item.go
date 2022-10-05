@@ -5,7 +5,7 @@ import (
 )
 
 type Item struct {
-	ID                     int
+	ID                     int64
 	Name                   string
 	Url                    string
 	LastPrice              *int

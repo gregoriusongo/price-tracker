@@ -9,6 +9,7 @@ import (
 
 type TChat entity.TelegramChat
 
+// get all active telegram chat data
 func (t TChat) GetAllTelegramChats() (chats []TChat, err error) {
 	ctx := context.Background()
 
@@ -24,6 +25,7 @@ func (t TChat) GetAllTelegramChats() (chats []TChat, err error) {
 	return
 }
 
+// select data by telegram chat id
 func (data *TChat) SelectByID(id int64) error {
 	ctx := context.Background()
 

@@ -47,7 +47,7 @@ func StartListening() {
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, "")
 
 		// get user bot state
-		err, state := GetIDState(update.Message.Chat.ID)
+		state, err := GetIDState(update.Message.Chat.ID)
 		if err != nil {
 			msg.Text = "Encountered error."
 		}

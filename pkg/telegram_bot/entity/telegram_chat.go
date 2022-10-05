@@ -3,7 +3,7 @@ package entity
 import "time"
 
 type TelegramChat struct {
-	ID          *int
+	ID          *int64
 	ChatID      int64
 	FirstName   string
 	LastName    *string

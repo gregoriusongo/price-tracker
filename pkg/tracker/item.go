@@ -2,6 +2,7 @@ package tracker
 
 import (
 	"errors"
+	"net/url"
 	"strings"
 
 	db "github.com/gregoriusongo/price-tracker/pkg/tracker/repo/postgres"
@@ -10,7 +11,7 @@ import (
 var ecommerce db.Ecommerce
 
 // insert product url, if product already exist, return it's id
-func InsertUrl(url string) (id int64, err error){
+func InsertUrl(url *url.URL) (id int64, err error){
 	// get all ecommerce urls
 	ecommerces, err := ecommerce.GetAllEcommerce()
 	if err != nil{
@@ -24,10 +25,10 @@ func InsertUrl(url string) (id int64, err error){
 
 	var i db.Item
 	for _, ec := range ecommerces{
-		if strings.Contains(url, ec.SiteUrl){
+		if strings.Contains(url.Host, ec.SiteUrl){
 			// ecommerce found
 			i.EcommerceID = int8(ec.ID)
-			i.Url = url
+			i.Url = "https://" + url.Host + url.Path
 			break
 		}
 	}
@@ -36,7 +37,8 @@ func InsertUrl(url string) (id int64, err error){
 		return 0, errors.New("not supported")
 	}
 
-	if err := i.InsertBlankItem(); err != nil{
+	id, err = i.InsertBlankItem()
+	if err != nil{
 		return 0, err
 	}
 

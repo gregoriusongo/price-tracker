@@ -1,6 +1,7 @@
 package telegram_bot
 
 import (
+	"context"
 	"log"
 	"net/url"
 
@@ -11,17 +12,17 @@ import (
 
 // get telegram chat state
 // 0 = home, 1 = additem, 2 = deleteitem
-func GetIDState(chatID int64) (error, int) {
+func GetIDState(chatID int64) (int, error) {
 	var tc postgres.TChat
 
 	if err := tc.SelectByID(chatID); err != nil {
 		log.Println(err)
-		return err, 0
+		return 0, err
 	}
 	if tc.ID == nil {
-		return nil, 0
+		return 0, nil
 	} else {
-		return nil, tc.State
+		return tc.State, nil
 	}
 }
 
@@ -120,29 +121,70 @@ func Deactivate(chatID int64) string {
 	}
 }
 
-// add item to telegram id
+// save item to telegram chat id
 func SaveItem(chatID int64, productUrl string) string {
-	// TODO add url checking
-	_, err := url.Parse(productUrl)
+	// check valid url
+	url, err := url.ParseRequestURI(productUrl)
 	if err != nil {
 		return "invalid url"
 	}
+	log.Println(url)
 
-	// insert product to db
-	id, err := tracker.InsertUrl(productUrl);
-	if err != nil {
-		log.Println(err)
-
-		if err.Error() == "not supported"{
-			return "Link not supported"
-		}
-
-		return "Failed to save item"
+	// start db transaction
+	ctx := context.Background()
+	tx, err := postgres.GetDB().Begin(ctx)
+	if err != nil{
+		// failed to start transaction
+		return "Database error"
 	}
-	log.Println(id)
+
+	var itemId int64
+	itemId, err = tracker.CheckUrlExist("https://" + url.Host + url.Path)
+	if err != nil {
+		tx.Rollback(ctx)
+		return "Unexpected error"
+	} else if itemId != 0 {
+		// item found
+		log.Println(itemId)
+	} else {
+		// item doesnt exist
+		// insert product to db
+		itemId, err = tracker.InsertUrl(url)
+		if err != nil {
+			tx.Rollback(ctx)
+			log.Println(err)
+
+			if err.Error() == "not supported" {
+				return "Link not supported"
+			}
+
+			return "Failed to save item"
+		}
+		log.Println(itemId)
+	}
 
 	// track this item
+	// get telegram id
+	var tc = postgres.TChat{
+		ChatID: chatID,
+	}
+	if err := tc.SelectByID(tc.ChatID); err != nil{
+		tx.Rollback(ctx)
+		return "User not found"
+	}
 
+	// insert user item to db
+	var tui = postgres.TUserItem{
+		TelegramChatID: *tc.ID,
+		ItemID: itemId,
+	}
+	if err := tui.InsertUserItem(); err != nil{
+		// TODO handle duplicate error
+		tx.Rollback(ctx)
+		return "unexpected error"
+	}
+
+	tx.Commit(ctx)
 	return "OK"
 }
 

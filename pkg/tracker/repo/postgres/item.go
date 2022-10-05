@@ -69,8 +69,8 @@ func (i Item) Deleteitem(id int) error {
 	return nil
 }
 
-// insert new unscraped item
-func (i Item) InsertBlankItem() (id int, err error) {
+// insert new unscraped item, returning it's id
+func (i Item) InsertBlankItem() (id int64, err error) {
 	ctx := context.Background()
 
 	query := `
@@ -82,6 +82,29 @@ func (i Item) InsertBlankItem() (id int, err error) {
 	err = dbpool.QueryRow(ctx, query, i.Url, i.EcommerceID).Scan(&id)
 
 	return
+}
+
+// select item by url
+func (i *Item) SelectByURL() error{
+	ctx := context.Background()
+
+	query := `
+	SELECT id
+	FROM item
+	WHERE url = $1
+	LIMIT 1
+	`
+
+	if err := pgxscan.Get(ctx, dbpool, i, query, i.Url); err != nil {
+		// handle db error
+		if err.Error() == "scanning one: no rows in result set" {
+			return nil
+		} else {
+			return err
+		}
+	} else {
+		return nil
+	}
 }
 
 // func (item *Item) GetItemById(id int64) (*Item, *gorm.DB) {

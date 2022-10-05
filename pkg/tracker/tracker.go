@@ -152,3 +152,17 @@ func compareScrapedData(currentData *db.Item, scrapeData ScrapeData) {
 		currentData.HighestDiscount = currentData.LastDiscount
 	}
 }
+
+// check item with the supplied url exist or not
+// if exist, return it's id
+func CheckUrlExist (url string) (int64, error){
+	var it = db.Item{
+		Url: url,
+	}
+
+	if err := it.SelectByURL(); err != nil{
+		return 0, err
+	}
+
+	return it.ID, nil
+}
