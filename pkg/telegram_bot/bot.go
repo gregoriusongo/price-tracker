@@ -8,15 +8,16 @@ import (
 )
 
 // var updates tgbotapi.UpdatesChannel
-// var bot *tgbotapi.BotAPI
+var bot *tgbotapi.BotAPI
 
+// main telegram bot function
 func StartListening() {
 	config, err := util.LoadConfig()
 	if err != nil {
 		log.Fatal("cannot load config:", err)
 	}
 
-	bot, err := tgbotapi.NewBotAPI(config.TelegramBot.Token)
+	bot, err = tgbotapi.NewBotAPI(config.TelegramBot.Token)
 	if err != nil {
 		panic(err)
 	}
@@ -103,5 +104,15 @@ func StartListening() {
 		if _, err := bot.Send(msg); err != nil {
 			log.Fatal(err)
 		}
+	}
+}
+
+// send message to chat id
+func SendMessage(chatID int64, chatText string){
+	msg := tgbotapi.NewMessage(chatID, chatText)
+
+	// TODO handle when telegram or network down
+	if _, err := bot.Send(msg); err != nil {
+		log.Fatal(err)
 	}
 }
