@@ -107,7 +107,7 @@ func StartListening() {
 	}
 }
 
-// send message to chat id
+// send bot message to telegram chat id
 func SendMessage(chatID int64, chatText string){
 	msg := tgbotapi.NewMessage(chatID, chatText)
 

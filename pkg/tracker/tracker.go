@@ -20,6 +20,7 @@ type ScrapeData struct {
 	DiscountPercentage int
 }
 
+// main scrape function
 func Scrape() {
 	log.Println("starting app")
 
@@ -52,6 +53,7 @@ func Scrape() {
 
 }
 
+// scrape one item
 func scrapeSingleItem(item db.Item) (ScrapeData, error) {
 	var selector = map[string]string{}
 
@@ -102,6 +104,7 @@ func preparePrice(price string) int {
 	return priceInt
 }
 
+// compare scraped data with old data and return update data
 func compareScrapedData(currentData *db.Item, scrapeData ScrapeData) {
 	// log.Println(currentData)
 	// log.Println(scrapeData)

@@ -185,6 +185,7 @@ func SaveItem(chatID int64, productUrl string) string {
 	return "OK"
 }
 
+// delete item from user follow list
 func DeleteItem(chatID int64, productUrl string) string{
 	return "Item deleted"
 }
