@@ -143,7 +143,7 @@ func SaveItem(chatID int64, productUrl string) string {
 		tx.Rollback(ctx)
 		return "Unexpected error"
 	} else if itemId != 0 {
-		// item found
+		// item found, do nothing for now
 	} else {
 		// item doesnt exist
 		// insert product to db
@@ -157,7 +157,7 @@ func SaveItem(chatID int64, productUrl string) string {
 
 			return "Failed to save item"
 		}
-		log.Println(itemId)
+		// log.Println(itemId)
 	}
 
 	// track this item
@@ -183,6 +183,10 @@ func SaveItem(chatID int64, productUrl string) string {
 
 	tx.Commit(ctx)
 	return "OK"
+}
+
+func DeleteItem(chatID int64, productUrl string) string{
+	return "Item deleted"
 }
 
 // TODO finish this function

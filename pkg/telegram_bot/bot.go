@@ -95,7 +95,7 @@ func StartListening() {
 			case "done":
 				msg.Text = SetStateHome(update.Message.Chat.ID)
 			default:
-				msg.Text = "Deleting item"
+				msg.Text = DeleteItem(update.Message.Chat.ID, update.Message.Text)
 			}
 		}
 
